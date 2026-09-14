@@ -199,7 +199,7 @@ def create_weekly_dataset(sales, skus, promotions):
         how="left"
     )
 
-    # ========================================================
+        # ========================================================
     # Promotion features
     # ========================================================
 
@@ -207,39 +207,38 @@ def create_weekly_dataset(sales, skus, promotions):
 
     promo_rows = []
 
+    # Create one record for each promotion-week
+    # This matches the forecasting notebook methodology.
     for _, row in promotions.iterrows():
 
-        dates = pd.date_range(
-            start=row["start_date"],
-            end=row["end_date"],
-            freq="D"
+        weeks = pd.date_range(
+            start=row["start_date"].to_period("W-SUN").start_time,
+            end=row["end_date"].to_period("W-SUN").start_time,
+            freq="7D"
         )
 
-        for date in dates:
+        for week in weeks:
+
             promo_rows.append(
                 {
-                    "date": date,
+                    "week": week,
+                    "promo_type": row["promo_type"],
                     "discount_pct": row["discount_pct"]
                 }
             )
 
     if promo_rows:
 
-        promo_daily = pd.DataFrame(promo_rows)
+        promo_weekly = pd.DataFrame(promo_rows)
 
-        promo_daily["week"] = (
-            promo_daily["date"]
-            .dt.to_period("W-SUN")
-            .dt.start_time
-        )
-
+        # Aggregate promotions to one row per week
         promo_weekly = (
-            promo_daily
+            promo_weekly
             .groupby("week", as_index=False)
             .agg(
-                promo_flag=("discount_pct", lambda x: 1),
-                promo_discount=("discount_pct", "mean"),
-                promo_count=("discount_pct", "count")
+                promo_flag=("promo_type", lambda x: 1),
+                promo_discount=("discount_pct", "max"),
+                promo_count=("promo_type", "count")
             )
         )
 
