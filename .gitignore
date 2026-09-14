@@ -1,0 +1,18 @@
+# Raw client/simulated data
+archive/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Local environment
+.venv/
+venv/
+env/
+
+# Streamlit cache
+.streamlit/
+
+# OS files
+.DS_Store
+Thumbs.db
