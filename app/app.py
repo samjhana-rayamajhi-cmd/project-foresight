@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-
+from pathlib import Path
 # ============================================================
 # PAGE CONFIG
 # ============================================================
@@ -81,15 +81,16 @@ st.markdown("""
 # LOAD DATA
 # ============================================================
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "data"
+
 inventory = pd.read_csv(
-    r"D:\FORESIGHT\data\final_inventory_risk.csv"
+    DATA_DIR / "final_inventory_risk.csv"
 )
 
 forecast = pd.read_csv(
-    r"D:\FORESIGHT\data\final_6_week_forecast.csv"
+    DATA_DIR / "final_6_week_forecast.csv"
 )
-
-forecast["week"] = pd.to_datetime(forecast["week"])
 
 # ============================================================
 # HEADER
