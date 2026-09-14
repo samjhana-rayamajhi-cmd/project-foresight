@@ -3,6 +3,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from pathlib import Path
+
+
 # ============================================================
 # PAGE CONFIG
 # ============================================================
@@ -13,6 +15,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
 
 # ============================================================
 # CUSTOM CSS
@@ -77,6 +80,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+
 # ============================================================
 # LOAD DATA
 # ============================================================
@@ -91,6 +95,7 @@ inventory = pd.read_csv(
 forecast = pd.read_csv(
     DATA_DIR / "final_6_week_forecast.csv"
 )
+
 
 # ============================================================
 # HEADER
@@ -113,6 +118,7 @@ st.write(
 )
 
 st.divider()
+
 
 # ============================================================
 # SIDEBAR
@@ -160,6 +166,7 @@ st.sidebar.info(
     """
 )
 
+
 # ============================================================
 # FILTER DATA
 # ============================================================
@@ -175,6 +182,7 @@ if selected_decision != "All":
     filtered_inventory = filtered_inventory[
         filtered_inventory["decision"] == selected_decision
     ]
+
 
 # ============================================================
 # KPI CALCULATIONS
@@ -203,6 +211,7 @@ excess_percentage = (
     if total_stock > 0
     else 0
 )
+
 
 # ============================================================
 # EXECUTIVE SUMMARY
@@ -246,6 +255,7 @@ with c5:
     )
 
 st.write("")
+
 
 # ============================================================
 # RISK COUNTS
@@ -308,6 +318,7 @@ with r4:
 
 st.divider()
 
+
 # ============================================================
 # CATEGORY ANALYSIS
 # ============================================================
@@ -357,6 +368,7 @@ with col_chart1:
         use_container_width=True
     )
 
+
 with col_chart2:
 
     fig_stock = px.bar(
@@ -383,6 +395,59 @@ with col_chart2:
         fig_stock,
         use_container_width=True
     )
+
+
+# ============================================================
+# MODEL PERFORMANCE
+# ============================================================
+
+st.markdown(
+    '<div class="section-title">📊 Model Performance</div>',
+    unsafe_allow_html=True
+)
+
+st.caption(
+    "Backtest performance on the held-out time-based test period."
+)
+
+perf_col1, perf_col2 = st.columns(2)
+
+with perf_col1:
+    st.metric(
+        "Seasonal-Naive WAPE",
+        "45.56%"
+    )
+
+with perf_col2:
+    st.metric(
+        "Final Model WAPE",
+        "31.73%",
+        delta="-13.83 percentage points"
+    )
+
+perf_col3, perf_col4 = st.columns(2)
+
+with perf_col3:
+    st.metric(
+        "Seasonal-Naive Bias",
+        "+13.50%"
+    )
+
+with perf_col4:
+    st.metric(
+        "Final Model Bias",
+        "+4.57%",
+        delta="-8.93 percentage points"
+    )
+
+st.info(
+    "The final forecasting model outperforms the seasonal-naive "
+    "baseline on the held-out test period. Lower WAPE indicates "
+    "better forecast accuracy."
+)
+
+st.divider()
+
 
 # ============================================================
 # SIX WEEK FORECAST
@@ -431,6 +496,7 @@ st.plotly_chart(
 
 st.divider()
 
+
 # ============================================================
 # PRIORITY ACTIONS
 # ============================================================
@@ -471,31 +537,38 @@ st.dataframe(
         "sku_id": "SKU ID",
         "sku_name": "SKU Name",
         "category": "Category",
+
         "stock_on_hand": st.column_config.NumberColumn(
             "Current Stock",
             format="%.0f"
         ),
+
         "forecast_6_week_demand": st.column_config.NumberColumn(
             "6W Forecast",
             format="%.0f"
         ),
+
         "excess_units": st.column_config.NumberColumn(
             "Excess Units",
             format="%.0f"
         ),
+
         "excess_value": st.column_config.NumberColumn(
             "Excess Value",
             format="₹%.0f"
         ),
+
         "forecast_cv": st.column_config.NumberColumn(
             "Forecast CV",
             format="%.3f"
         ),
+
         "decision": "Action"
     }
 )
 
 st.divider()
+
 
 # ============================================================
 # SKU DETAIL
@@ -583,6 +656,14 @@ if len(filtered_inventory) > 0:
         use_container_width=True
     )
 
+else:
+
+    st.warning(
+        "No SKUs match the selected filters. "
+        "Please change the category or risk decision."
+    )
+
+
 # ============================================================
 # INVENTORY RISK TABLE
 # ============================================================
@@ -614,41 +695,54 @@ st.dataframe(
     use_container_width=True,
     hide_index=True,
     column_config={
+
         "sku_id": "SKU ID",
+
         "sku_name": "SKU Name",
+
         "category": "Category",
+
         "stock_on_hand": st.column_config.NumberColumn(
             "Stock",
             format="%.0f"
         ),
+
         "forecast_6_week_demand": st.column_config.NumberColumn(
             "6W Forecast",
             format="%.0f"
         ),
+
         "avg_weekly_forecast": st.column_config.NumberColumn(
             "Avg Weekly Forecast",
             format="%.1f"
         ),
+
         "coverage_weeks": st.column_config.NumberColumn(
             "Coverage",
             format="%.1f weeks"
         ),
+
         "excess_units": st.column_config.NumberColumn(
             "Excess Units",
             format="%.0f"
         ),
+
         "excess_value": st.column_config.NumberColumn(
             "Excess Value",
             format="₹%.0f"
         ),
+
         "forecast_cv": st.column_config.NumberColumn(
             "CV",
             format="%.3f"
         ),
+
         "decision": "Risk Decision",
+
         "priority_rank": "Priority"
     }
 )
+
 
 # ============================================================
 # BUSINESS INSIGHTS
@@ -664,6 +758,7 @@ st.markdown(
 i1, i2, i3 = st.columns(3)
 
 with i1:
+
     st.info(
         """
         **High Excess Inventory**
@@ -675,6 +770,7 @@ with i1:
     )
 
 with i2:
+
     st.info(
         """
         **Electronics Has Highest Impact**
@@ -686,6 +782,7 @@ with i2:
     )
 
 with i3:
+
     st.info(
         """
         **Markdown Is the Main Action**
@@ -694,6 +791,7 @@ with i3:
         while a smaller group is Watch/Volatile.
         """
     )
+
 
 # ============================================================
 # FOOTER
