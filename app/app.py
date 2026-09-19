@@ -16,7 +16,7 @@ from pathlib import Path
 
 st.set_page_config(
     page_title="FORESIGHT | Inventory Intelligence",
-    page_icon="📦",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -55,6 +55,38 @@ st.markdown(
         font-size: 25px;
         font-weight: 650;
         margin-top: 15px;
+    }
+
+    .sidebar-info-box {
+        background: linear-gradient(135deg, #1f3b5b, #294d73);
+        border-radius: 10px;
+        padding: 18px 16px;
+        margin-top: 10px;
+        border: 1px solid #3b6088;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .sidebar-info-label {
+        color: #ffffff !important;
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .sidebar-info-value {
+        color: #dbeafe !important;
+        font-size: 15px;
+        line-height: 1.5;
+        margin-bottom: 15px;
+    }
+
+    [data-testid="stSidebar"] label {
+        color: #ffffff !important;
+        font-weight: 600;
+    }
+
+    [data-testid="stSidebar"] [data-baseweb="select"] > div {
+        color: #ffffff !important;
     }
 
     </style>
@@ -160,7 +192,7 @@ st.divider()
 # ============================================================
 
 st.sidebar.title(
-    "🎛️ Dashboard Controls"
+    "☰ Dashboard Controls"
 )
 
 st.sidebar.markdown(
@@ -186,13 +218,11 @@ selected_category = st.sidebar.selectbox(
 )
 
 
-decisions = [
-    "All"
-] + sorted(
-    inventory[
-        "decision"
-    ]
+decisions = ["All"] + sorted(
+    inventory["decision"]
     .dropna()
+    .astype(str)
+    .str.strip()
     .unique()
     .tolist()
 )
@@ -209,18 +239,17 @@ st.sidebar.divider()
 
 st.sidebar.info(
     """
-**Forecast Horizon**
+### ℹ️ Project Information
 
+**Forecast Horizon**  
 Next 6 weeks
 
-**Primary Metric**
-
+**Primary Metric**  
 WAPE
 
-**Risk Framework**
-
+**Risk Framework**  
 Reorder • Markdown • Watch • Healthy
-"""
+    """
 )
 
 
@@ -230,21 +259,26 @@ Reorder • Markdown • Watch • Healthy
 
 filtered_inventory = inventory.copy()
 
-
+# Category filter
 if selected_category != "All":
-
     filtered_inventory = filtered_inventory[
-        filtered_inventory["category"]
-        == selected_category
+        filtered_inventory["category"].astype(str).str.strip()
+        == str(selected_category).strip()
     ]
 
-
+# Risk decision filter
 if selected_decision != "All":
-
     filtered_inventory = filtered_inventory[
-        filtered_inventory["decision"]
-        == selected_decision
+        filtered_inventory["decision"].astype(str).str.strip()
+        == str(selected_decision).strip()
     ]
+
+# ============================================================
+# DISPLAY HELPERS
+# ============================================================
+
+def format_inr_millions(value):
+    return f"₹{value / 1_000_000:.2f}M"
 
 
 # ============================================================
@@ -330,7 +364,7 @@ with c4:
 
     st.metric(
         "Excess Inventory",
-        f"₹{total_excess_value:,.0f}"
+        format_inr_millions(total_excess_value)
     )
 
 
@@ -1310,7 +1344,7 @@ if len(filtered_inventory) > 0:
 **High Excess Inventory**
 
 The filtered portfolio contains approximately
-**₹{total_excess_value:,.0f}**
+**{format_inr_millions(total_excess_value)}**
 of excess inventory value.
 
 The primary opportunity is to reduce
@@ -1329,7 +1363,7 @@ working-capital exposure.
 has the largest excess inventory
 value in the current selection:
 
-**₹{highest_category_value:,.0f}**
+**{format_inr_millions(highest_category_value)}**
 """
         )
 
